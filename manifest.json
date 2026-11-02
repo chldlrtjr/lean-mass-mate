@@ -1,0 +1,26 @@
+{
+  "id": "/lean-mass-mate/",
+  "name": "린매스업 메이트 - 헬스 & 식단 앱",
+  "short_name": "린매스업",
+  "description": "주 4회+ 헬스 루틴, 오프라인 29종 모션 GIF, 세트 타이머, 탄단지 식단 기록 앱",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
