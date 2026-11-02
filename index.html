@@ -1118,6 +1118,99 @@
       font-size: 16px;
       outline: none;
     }
+  
+    /* Category Filter Chips */
+    .filter-chips-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 2px 10px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-chips-row::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      flex-shrink: 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Catalog Picker Item in Bottom Sheet */
+    .catalog-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      gap: 10px;
+    }
+    .catalog-item:active {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.12);
+    }
+    .catalog-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .catalog-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background: #fff;
+      object-fit: contain;
+      border: 1px solid var(--primary);
+      flex-shrink: 0;
+    }
+    .catalog-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .catalog-tag {
+      font-size: 0.72rem;
+      color: #6ee7b7;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .catalog-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .catalog-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
   </style>
 </head>
 <body>
@@ -1210,10 +1303,18 @@
         <!-- Exercise Cards Container -->
         <div id="workoutList"></div>
 
-        <!-- Add Custom Exercise -->
-        <div class="card" style="display:flex; gap:8px; padding:12px;">
-          <input type="text" id="newExInput" class="form-input" placeholder="종목 직접 추가 (예: 덤벨 컬)" style="flex:1;" />
-          <button class="btn btn-ghost" onclick="addCustomExercise()">+ 추가</button>
+        <!-- Add Exercise Actions -->
+        <div class="card" style="padding:14px; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-accent" style="width:100%; padding:14px; font-size:0.92rem; font-weight:800; box-shadow:0 6px 16px rgba(16,185,129,0.35);" onclick="openAddExerciseModal()">
+            + 🏋️ 운동 라이브러리에서 종목 추가하기
+          </button>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="newExInput" class="form-input" placeholder="원하는 종목명 직접 입력 (예: 케이블 크로스오버)" style="flex:1; font-size:0.85rem;" />
+            <button class="btn btn-ghost" onclick="addCustomExercise()">+ 직접 추가</button>
+          </div>
+          <div style="font-size:0.73rem; color:var(--text-muted); text-align:center;">
+            💡 운동 카드의 <b>[▲] [▼]</b>로 순서 변경, <b>[✕]</b>로 언제든 루틴에서 제외할 수 있습니다.
+          </div>
         </div>
       </div>
 
@@ -1371,12 +1472,22 @@
       <div id="pane-guide" class="tab-pane">
         <div class="card">
           <div class="card-head">
-            <span class="card-title">🎬 오프라인 운동 모션 & 기구 백과사전</span>
+            <span class="card-title">🎬 오프라인 운동 모션 & 기구 백과사전 (26종)</span>
             <span class="badge badge-green">데이터 0MB</span>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
-            모든 운동 모션 영상(GIF)이 앱 파일 안에 내장되어 있어 <b>비행기 모드나 데이터가 없는 곳에서도 즉시 재생</b>됩니다.
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
+            모든 운동이 <b>1종목씩 개별 분리</b>되어 있습니다. 자세를 보거나 <b>[+ 오늘 루틴에 추가]</b>를 눌러 즉시 루틴에 담으세요!
           </p>
+          <!-- Category Filter Chips for Guide -->
+          <div class="filter-chips-row" id="guideFilterRow">
+            <button class="filter-chip active" data-cat="all" onclick="filterGuideCategory('all', this)">전체 (26)</button>
+            <button class="filter-chip" data-cat="chest" onclick="filterGuideCategory('chest', this)">가슴 (4)</button>
+            <button class="filter-chip" data-cat="back" onclick="filterGuideCategory('back', this)">등 (4)</button>
+            <button class="filter-chip" data-cat="shoulder" onclick="filterGuideCategory('shoulder', this)">어깨 (3)</button>
+            <button class="filter-chip" data-cat="leg" onclick="filterGuideCategory('leg', this)">하체 (9)</button>
+            <button class="filter-chip" data-cat="arm" onclick="filterGuideCategory('arm', this)">팔(이두/삼두) (3)</button>
+            <button class="filter-chip" data-cat="core" onclick="filterGuideCategory('core', this)">코어/유산소 (3)</button>
+          </div>
           <div id="exerciseEncyclopediaList"></div>
         </div>
 
@@ -1619,9 +1730,17 @@
       const legPressWarm = roundToStep(legPressW * 0.75, 5);
       const legPressTop = roundToStep(legPressW * 1.12, 5);
 
+      const squatW = roundToStep(50 * f, 5);
+      const squatWarm = roundToStep(squatW * 0.75, 5);
+      const squatTop = roundToStep(squatW + 5, 5);
+
       const chestW = roundToStep(35 * f, 5);
       const chestWarm = roundToStep(chestW * 0.72, 5);
       const chestTop = roundToStep(chestW + 5, 5);
+
+      const benchW = roundToStep(40 * f, 5);
+      const benchWarm = roundToStep(benchW * 0.75, 5);
+      const benchTop = roundToStep(benchW + 5, 5);
 
       const latW = roundToStep(35 * f, 5);
       const latWarm = roundToStep(latW * 0.85, 5);
@@ -1636,6 +1755,7 @@
       const latRaiseW = Math.max(2, Math.round(4 * f));
       const latRaiseTop = Math.max(3, Math.round(5 * f));
       const curlW = Math.max(4, Math.round(8 * f));
+      const hammerW = Math.max(4, Math.round(9 * f));
       const pushdownW = roundToStep(15 * f, 2.5);
       const gobletW = roundToStep(20 * f, 2);
       const legExtW = roundToStep(30 * f, 5);
@@ -1662,12 +1782,12 @@
         routines: {
           day0: [
             {
-              name: "워밍업 트레드밀 걷기 (분)",
-              tip: "속도 4.8~5.2로 가볍게 걸으며 체온 올리기 & 어깨 돌리기",
+              name: "워밍업 트레드밀 걷기",
+              tip: "속도 4.8~5.2로 가볍게 걸으며 체온 올리기 & 관절 풀기",
               sets: [{ role: "워밍업", kg: 0, reps: 8, done: false }]
             },
             {
-              name: "레그 프레스 (하체 메인)",
+              name: "45° 레그 프레스",
               tip: "1세트 가볍게 관절 풀고 2~4세트 본중량 진행 (발판 중앙 어깨너비)",
               sets: [
                 { role: "워밍업", kg: legPressWarm, reps: 15, done: false },
@@ -1677,7 +1797,7 @@
               ]
             },
             {
-              name: "체스트 프레스 머신 (가슴 메인)",
+              name: "체스트 프레스 머신",
               tip: "날개뼈를 등받이에 고정하고 가슴 힘으로 밀기 (휴식 90초)",
               sets: [
                 { role: "워밍업", kg: chestWarm, reps: 15, done: false },
@@ -1687,7 +1807,7 @@
               ]
             },
             {
-              name: "랫 풀 다운 (등 메인)",
+              name: "랫 풀 다운",
               tip: "어깨(날개뼈)를 먼저 내린 뒤 팔꿈치를 옆구리로 당기기",
               sets: [
                 { role: "워밍업", kg: latWarm, reps: 15, done: false },
@@ -1697,7 +1817,7 @@
               ]
             },
             {
-              name: "숄더 프레스 머신 (어깨)",
+              name: "숄더 프레스 머신",
               tip: "승모근 으쓱 주의, 귀 높이까지 천천히 버티며 내리기",
               sets: [
                 { role: "워밍업", kg: shoulderWarm, reps: 15, done: false },
@@ -1706,7 +1826,7 @@
               ]
             },
             {
-              name: "크런치 (복근 · 코어)",
+              name: "바닥 크런치",
               tip: "목을 당기지 말고 윗배를 말아 올리며 호흡 끝까지 뱉기",
               sets: [
                 { role: "본세트", kg: 0, reps: 15, done: false },
@@ -1715,15 +1835,15 @@
               ]
             },
             {
-              name: "마무리 경사 걷기 유산소 (분)",
-              tip: "경사도(Incline) 6~8, 속도 5.0으로 20분 (체지방 연소 핵심)",
-              sets: [{ role: "유산소", kg: 0, reps: 20, done: false }]
+              name: "트레드밀 인클라인 걷기",
+              tip: "경사 6~8, 속도 5.0으로 15분 유산소 마무리",
+              sets: [{ role: "유산소", kg: 0, reps: 15, done: false }]
             }
           ],
           upperA: [
             {
-              name: "체스트 프레스 / 벤치프레스 (가슴 메인)",
-              tip: "4세트 구성: 워밍업 15회 후 본세트 12회, 마지막 탑세트 10회",
+              name: "체스트 프레스 머신",
+              tip: "가슴 중앙 자극! 어깨 고정 후 가슴 힘으로 밀기 (4세트)",
               sets: [
                 { role: "워밍업", kg: chestWarm, reps: 15, done: false },
                 { role: "본세트", kg: chestW, reps: 12, done: false },
@@ -1732,8 +1852,8 @@
               ]
             },
             {
-              name: "랫 풀 다운 (등 너비 메인)",
-              tip: "쇄골(윗가슴) 쪽으로 당기며 광배근 수축 느끼기",
+              name: "랫 풀 다운",
+              tip: "등 너비 프레임 확장! 쇄골 쪽으로 당기기 (4세트)",
               sets: [
                 { role: "워밍업", kg: latWarm, reps: 15, done: false },
                 { role: "본세트", kg: latW, reps: 12, done: false },
@@ -1742,89 +1862,97 @@
               ]
             },
             {
-              name: "인클라인 프레스 머신 (윗가슴)",
-              tip: "명치를 천장 쪽으로 높게 들고 대각선 위로 밀기 (3세트)",
+              name: "인클라인 체스트 프레스 머신",
+              tip: "윗가슴 채우기! 의자 약간 낮추고 쇄골 쪽으로 밀기 (3세트)",
               sets: [
-                { role: "본세트", kg: Math.max(15, inclineW - 5), reps: 15, done: false },
+                { role: "본세트", kg: Math.max(15, inclineW - 5), reps: 12, done: false },
                 { role: "본세트", kg: inclineW, reps: 12, done: false },
                 { role: "탑세트", kg: inclineW + 5, reps: 10, done: false }
               ]
             },
             {
-              name: "시티드 케이블 로우 (등 두께)",
-              tip: "허리를 곧게 펴고 배꼽 위쪽으로 당기며 등 중앙 조이기 (3세트)",
+              name: "시티드 케이블 로우",
+              tip: "등 두께감! 배꼽 쪽으로 당기며 날개뼈 꽉 조이기 (3세트)",
               sets: [
-                { role: "본세트", kg: Math.max(20, rowW - 5), reps: 15, done: false },
+                { role: "본세트", kg: Math.max(20, rowW - 5), reps: 12, done: false },
                 { role: "본세트", kg: rowW, reps: 12, done: false },
-                { role: "탑세트", kg: rowW + 5, reps: 12, done: false }
+                { role: "탑세트", kg: rowW + 5, reps: 10, done: false }
               ]
             },
             {
-              name: "덤벨 사이드 레터럴 레이즈 (옆어깨)",
-              tip: "한 손 덤벨 기준 무게! 반동 없이 옆으로 멀리 던지듯 15회",
+              name: "덤벨 사이드 레터럴 레이즈",
+              tip: "어깨 깡패 필수! 반동 없이 팔꿈치로 물 붓듯 들기 (3세트)",
               sets: [
                 { role: "본세트", kg: latRaiseW, reps: 15, done: false },
-                { role: "본세트", kg: latRaiseTop, reps: 15, done: false },
-                { role: "본세트", kg: latRaiseTop, reps: 15, done: false }
+                { role: "본세트", kg: latRaiseW, reps: 15, done: false },
+                { role: "탑세트", kg: latRaiseTop, reps: 12, done: false }
               ]
             },
             {
-              name: "덤벨 컬(이두) & 케이블 푸쉬다운(삼두)",
-              tip: "팔꿈치를 옆구리에 고정하고 12~15회 자극 집중 (덤벨 1개 기준)",
+              name: "케이블 삼두 푸쉬다운",
+              tip: "팔 뒤쪽 삼두근 말굽 모양! 팔꿈치 옆구리 고정하고 아래로 펴기",
               sets: [
-                { role: "본세트", kg: curlW - 1, reps: 15, done: false },
-                { role: "본세트", kg: curlW, reps: 12, done: false },
-                { role: "본세트", kg: curlW, reps: 12, done: false }
+                { role: "본세트", kg: pushdownW, reps: 12, done: false },
+                { role: "본세트", kg: pushdownW, reps: 12, done: false },
+                { role: "본세트", kg: pushdownW + 2.5, reps: 10, done: false }
               ]
             },
             {
-              name: "마무리 경사 걷기 유산소 (분)",
-              tip: "경사 6~8, 속도 5.0으로 20분 걷기",
+              name: "덤벨 이두 컬",
+              tip: "팔 앞쪽 알통! 팔꿈치 흔들리지 않게 고정하고 정점에서 쥐어짜기",
+              sets: [
+                { role: "본세트", kg: curlW, reps: 12, done: false },
+                { role: "본세트", kg: curlW, reps: 12, done: false },
+                { role: "탑세트", kg: curlW + 2, reps: 10, done: false }
+              ]
+            },
+            {
+              name: "트레드밀 인클라인 걷기",
+              tip: "경사 6~8, 속도 5.0으로 20분 유산소 마무리",
               sets: [{ role: "유산소", kg: 0, reps: 20, done: false }]
             }
           ],
           lowerA: [
             {
-              name: "고블릿 스쿼트 (또는 바벨 스쿼트)",
-              tip: "덤벨을 가슴 앞에 안고 복압 단단히 잡기 (바벨 사용 시 총 40~50kg)",
-              sets: [
-                { role: "워밍업", kg: Math.max(12, gobletW - 4), reps: 15, done: false },
-                { role: "본세트", kg: gobletW, reps: 12, done: false },
-                { role: "본세트", kg: gobletW, reps: 12, done: false },
-                { role: "탑세트", kg: gobletW + 4, reps: 12, done: false }
-              ]
-            },
-            {
-              name: "레그 프레스 (하체 전체 볼륨)",
-              tip: "엉덩이가 뜨지 않는 깊이까지 내리고 뒤꿈치로 밀어올리기",
+              name: "45° 레그 프레스",
+              tip: "하체 메인 볼륨! 발판 어깨너비 11자 (4세트)",
               sets: [
                 { role: "워밍업", kg: legPressWarm, reps: 15, done: false },
                 { role: "본세트", kg: legPressW, reps: 12, done: false },
                 { role: "본세트", kg: legPressW, reps: 12, done: false },
-                { role: "탑세트", kg: legPressTop, reps: 12, done: false }
+                { role: "탑세트", kg: legPressTop, reps: 10, done: false }
               ]
             },
             {
-              name: "레그 익스텐션 (앞허벅지 고립)",
-              tip: "다리를 다 편 정점에서 1초간 앞허벅지 강하게 쥐어짜기",
+              name: "덤벨 고블릿 스쿼트",
+              tip: "가슴 펴고 깊게 앉아 하체 자극 극대화 (3세트)",
+              sets: [
+                { role: "본세트", kg: Math.max(12, gobletW - 4), reps: 12, done: false },
+                { role: "본세트", kg: gobletW, reps: 12, done: false },
+                { role: "탑세트", kg: gobletW + 4, reps: 10, done: false }
+              ]
+            },
+            {
+              name: "레그 익스텐션",
+              tip: "앞허벅지 고립! 정점에서 1초 멈추며 쥐어짜기 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(15, legExtW - 5), reps: 15, done: false },
-                { role: "본세트", kg: legExtW, reps: 15, done: false },
-                { role: "탑세트", kg: legExtW + 5, reps: 12, done: false }
+                { role: "본세트", kg: legExtW, reps: 12, done: false },
+                { role: "탑세트", kg: legExtW + 5, reps: 10, done: false }
               ]
             },
             {
-              name: "레그 컬 (뒷허벅지 고립)",
-              tip: "골반을 패드에 누르고 뒤꿈치를 엉덩이 쪽으로 당기기",
+              name: "시티드 레그 컬",
+              tip: "뒷허벅지(햄스트링) 당기기! 천천히 버티며 이완 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(15, legCurlW - 5), reps: 15, done: false },
                 { role: "본세트", kg: legCurlW, reps: 12, done: false },
-                { role: "본세트", kg: legCurlW, reps: 12, done: false }
+                { role: "탑세트", kg: legCurlW + 5, reps: 10, done: false }
               ]
             },
             {
-              name: "크런치 / 레그 레이즈 (복근)",
-              tip: "허리가 뜨지 않게 배꼽을 누르며 복근 힘으로 컨트롤",
+              name: "바닥 크런치",
+              tip: "복근 타는 느낌 집중! 윗배 쥐어짜기 (3세트)",
               sets: [
                 { role: "본세트", kg: 0, reps: 15, done: false },
                 { role: "본세트", kg: 0, reps: 15, done: false },
@@ -1832,25 +1960,15 @@
               ]
             },
             {
-              name: "마무리 유산소 (분)",
-              tip: "하체 날은 무릎 부담 적은 실내 사이클 또는 가벼운 경사 걷기 15분",
-              sets: [{ role: "유산소", kg: 0, reps: 15, done: false }]
+              name: "트레드밀 인클라인 걷기",
+              tip: "경사 6~8, 속도 5.0으로 20분 유산소",
+              sets: [{ role: "유산소", kg: 0, reps: 20, done: false }]
             }
           ],
           upperB: [
             {
-              name: "어시스트 풀업 (턱걸이 보조 머신)",
-              tip: "주의: 무게가 낮을수록 힘듦! 아래는 나를 밀어주는 '보조 무게(kg)'입니다",
-              sets: [
-                { role: "워밍업", kg: assistW + 5, reps: 12, done: false },
-                { role: "본세트", kg: assistW, reps: 10, done: false },
-                { role: "본세트", kg: assistW, reps: 10, done: false },
-                { role: "탑세트", kg: Math.max(10, assistW - 5), reps: 8, done: false }
-              ]
-            },
-            {
-              name: "숄더 프레스 머신 / 덤벨 프레스",
-              tip: "전완근을 수직으로 세우고 어깨 힘으로 밀어 올리기 (4세트)",
+              name: "숄더 프레스 머신",
+              tip: "어깨 메인 볼륨! 승모근 긴장 풀고 귀 높이까지 내리기 (4세트)",
               sets: [
                 { role: "워밍업", kg: shoulderWarm, reps: 15, done: false },
                 { role: "본세트", kg: shoulderW, reps: 12, done: false },
@@ -1859,16 +1977,26 @@
               ]
             },
             {
-              name: "펙 덱 플라이 (가슴 안쪽 모으기)",
-              tip: "팔꿈치를 살짝 구부린 채 큰 나무를 안듯 가슴 모아주기 (3세트)",
+              name: "어시스트 풀업 머신",
+              tip: "핀 무게가 무거울수록 쉬움! 내 체중의 약 40~50% 보조 (4세트)",
               sets: [
-                { role: "본세트", kg: Math.max(15, flyW - 5), reps: 15, done: false },
-                { role: "본세트", kg: flyW, reps: 12, done: false },
-                { role: "본세트", kg: flyW, reps: 12, done: false }
+                { role: "워밍업", kg: assistW + 5, reps: 12, done: false },
+                { role: "본세트", kg: assistW, reps: 10, done: false },
+                { role: "본세트", kg: assistW, reps: 10, done: false },
+                { role: "탑세트", kg: Math.max(10, assistW - 5), reps: 8, done: false }
               ]
             },
             {
-              name: "원암 덤벨 로우 (한 손 덤벨 기준)",
+              name: "펙 덱 플라이 머신",
+              tip: "가슴 안쪽 라인 모으기! 큰 나무를 안듯 모으기 (3세트)",
+              sets: [
+                { role: "본세트", kg: Math.max(15, flyW - 5), reps: 15, done: false },
+                { role: "본세트", kg: flyW, reps: 12, done: false },
+                { role: "탑세트", kg: flyW + 5, reps: 10, done: false }
+              ]
+            },
+            {
+              name: "원암 덤벨 로우",
               tip: "광배근 하부까지 길게 늘려준 뒤 골반 쪽으로 팔꿈치 당기기 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(10, dbRowW - 2), reps: 12, done: false },
@@ -1877,8 +2005,8 @@
               ]
             },
             {
-              name: "리어 델트 플라이 (뒷어깨 · 라운드숄더 교정)",
-              tip: "날개뼈를 고정하고 팔꿈치로 벽을 밀듯 뒤로 벌리기 (3세트)",
+              name: "리어 델트 플라이 머신",
+              tip: "뒷어깨 & 라운드숄더 교정! 날개뼈 고정하고 양옆으로 밀기 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(10, rearDeltW - 5), reps: 15, done: false },
                 { role: "본세트", kg: rearDeltW, reps: 15, done: false },
@@ -1886,24 +2014,33 @@
               ]
             },
             {
-              name: "케이블 푸쉬다운(삼두) & 해머 컬(이두)",
-              tip: "케이블 기준 무게! 정점에서 1초간 팔 근육 쥐어짜기",
+              name: "케이블 삼두 푸쉬다운",
+              tip: "삼두근 외측두 타겟! 팔꿈치 흔들리지 않게 고정 (3세트)",
               sets: [
-                { role: "본세트", kg: pushdownW, reps: 15, done: false },
-                { role: "본세트", kg: pushdownW + 2.5, reps: 12, done: false },
-                { role: "본세트", kg: pushdownW + 2.5, reps: 12, done: false }
+                { role: "본세트", kg: pushdownW, reps: 12, done: false },
+                { role: "본세트", kg: pushdownW, reps: 12, done: false },
+                { role: "본세트", kg: pushdownW + 2.5, reps: 10, done: false }
               ]
             },
             {
-              name: "마무리 경사 걷기 유산소 (분)",
+              name: "덤벨 해머 컬",
+              tip: "손바닥 마주 보며 망치질하듯 들어 팔 두께감 채우기 (3세트)",
+              sets: [
+                { role: "본세트", kg: hammerW, reps: 12, done: false },
+                { role: "본세트", kg: hammerW, reps: 12, done: false },
+                { role: "탑세트", kg: hammerW + 2, reps: 10, done: false }
+              ]
+            },
+            {
+              name: "트레드밀 인클라인 걷기",
               tip: "경사 6~8, 속도 5.0으로 20분 걷기",
               sets: [{ role: "유산소", kg: 0, reps: 20, done: false }]
             }
           ],
           lowerB: [
             {
-              name: "루마니안 데드리프트 (바벨/덤벨 합산 무게)",
-              tip: "허리 일자 중립 유지! 바벨을 허벅지·정강이에 스치듯 내리며 엉덩이 뒤로 빼기",
+              name: "바벨 루마니안 데드리프트",
+              tip: "허리 일자 중립 유지! 바벨을 허벅지에 스치듯 내리며 엉덩이 뒤로 빼기 (4세트)",
               sets: [
                 { role: "워밍업", kg: rdlWarm, reps: 15, done: false },
                 { role: "본세트", kg: rdlW, reps: 12, done: false },
@@ -1912,8 +2049,8 @@
               ]
             },
             {
-              name: "덤벨 런지 / 스플릿 스쿼트 (한 손 덤벨 기준)",
-              tip: "양손에 덤벨을 하나씩 들고 앞발 뒤꿈치와 엉덩이 힘으로 밀어 올라오기",
+              name: "덤벨 런지",
+              tip: "한 손 덤벨 기준! 앞발 뒤꿈치와 엉덩이 힘으로 밀어 올라오기 (3세트)",
               sets: [
                 { role: "본세트", kg: lungeW, reps: 12, done: false },
                 { role: "본세트", kg: lungeW, reps: 10, done: false },
@@ -1921,8 +2058,8 @@
               ]
             },
             {
-              name: "레그 컬 (뒷허벅지)",
-              tip: "내릴 때 2초 동안 버티며 햄스트링 자극 느끼기 (3세트)",
+              name: "시티드 레그 컬",
+              tip: "뒷허벅지 자극! 내릴 때 2초 동안 버티며 햄스트링 느끼기 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(15, legCurlW - 5), reps: 15, done: false },
                 { role: "본세트", kg: legCurlW, reps: 12, done: false },
@@ -1930,8 +2067,8 @@
               ]
             },
             {
-              name: "힙 어브덕션 머신 (중둔근 · 힙업)",
-              tip: "엉덩이 옆쪽 힘으로 다리를 벌리고 1초 정지 후 천천히 모으기",
+              name: "힙 어브덕션 머신",
+              tip: "중둔근 & 골반 라인! 엉덩이 옆쪽 힘으로 벌리고 1초 정지 (3세트)",
               sets: [
                 { role: "본세트", kg: Math.max(25, hipAbdW - 5), reps: 15, done: false },
                 { role: "본세트", kg: hipAbdW, reps: 15, done: false },
@@ -1939,8 +2076,8 @@
               ]
             },
             {
-              name: "플랭크 (코어 버티기 · 단위: 초)",
-              tip: "엉덩이와 복부를 강하게 조여 몸을 일직선으로 유지",
+              name: "프론트 플랭크",
+              tip: "코어 버티기(초 단위)! 엉덩이와 복부를 강하게 조여 일직선 유지 (3세트)",
               sets: [
                 { role: "본세트", kg: 0, reps: 45, done: false },
                 { role: "본세트", kg: 0, reps: 50, done: false },
@@ -1948,8 +2085,8 @@
               ]
             },
             {
-              name: "마무리 유산소 (분)",
-              tip: "실내 사이클 또는 경사 걷기 20분",
+              name: "트레드밀 인클라인 걷기",
+              tip: "경사 6~8, 속도 5.0으로 20분 걷기",
               sets: [{ role: "유산소", kg: 0, reps: 20, done: false }]
             }
           ]
@@ -1957,384 +2094,684 @@
       };
     }
 
-    // --- DETAILED EXERCISE DATABASE WITH OFFLINE GIF IDS ---
     const EXERCISE_DB = [
       {
-        match: ["레그 프레스"],
-        title: "레그 프레스 (45° Leg Press)",
-        target: "🦵 하체 전체 (앞허벅지 · 둔근)",
-        gifs: [{ id: "10Z2DXU", label: "45° 레그 프레스 머신" }],
-        setup: "등받이에 엉덩이와 허리를 빈틈없이 밀착시키고 앉습니다. 발판 중앙에 발을 어깨너비로 벌려 십일자(11자)보다 발끝이 살짝만 바깥(15도)을 향하게 둡니다.",
-        steps: [
-          "양손으로 옆 손잡이를 꽉 잡고, 다리를 펴서 안전바(잠금장치)를 양옆으로 풀어줍니다.",
-          "무릎이 가슴 쪽으로 온다는 느낌으로 천천히(2~3초) 발판을 받아내립니다 (무릎 각도 약 90도).",
-          "발바닥 전체(특히 뒤꿈치)로 발판을 강하게 밀어내며 다리를 폅니다 (무릎을 완전히 딱 소리 나게 잠그지 말고 95%만 폅니다)."
-        ],
-        breathing: "내릴 때 코로 들이마시고(흡!), 밀어 올릴 때 입으로 '후-' 내뱉습니다.",
-        mistakes: [
-          "무릎을 다 폈을 때 관절을 완전히 잠그면(과신전) 무릎 부상 위험이 있습니다.",
-          "너무 깊게 내려서 엉덩이와 아랫배(허리)가 의자에서 들리면 허리를 다칩니다."
-        ]
+            "category": "chest",
+            "categoryKo": "가슴",
+            "match": [
+                  "체스트 프레스 머신",
+                  "체스트 프레스"
+            ],
+            "title": "체스트 프레스 머신 (Chest Press)",
+            "target": "💪 가슴 중앙 (대흉근) · 삼두",
+            "gifs": [
+                  {
+                        "id": "DOoWcnA",
+                        "label": "체스트 프레스 머신"
+                  }
+            ],
+            "setup": "의자에 앉았을 때 손잡이가 가슴 중앙(명치 살짝 위)에 오도록 맞추고, 날개뼈를 등받이에 고정합니다.",
+            "steps": [
+                  "어깨가 앞으로 딸려 나가지 않게 고정한 채 가슴 근육으로 손잡이를 앞으로 밉니다.",
+                  "가슴이 늘어나는 것을 느끼며 2초 동안 천천히 버티며 시작 자세로 돌아옵니다."
+            ],
+            "breathing": "내릴 때 코로 들이마시고, 밀 때 입으로 '후-' 뱉습니다.",
+            "mistakes": [
+                  "어깨가 귀 쪽으로 으쓱 올라가지 않게 어깨를 내리고 가슴을 드세요."
+            ]
       },
       {
-        match: ["체스트 프레스", "벤치프레스"],
-        title: "체스트 프레스 머신 / 바벨 벤치프레스",
-        target: "💪 가슴 중앙 (대흉근) · 삼두",
-        gifs: [
-          { id: "DOoWcnA", label: "1. 체스트 프레스 머신" },
-          { id: "EIeI8Vf", label: "2. 바벨 벤치프레스" }
-        ],
-        setup: "의자에 앉았을 때 손잡이가 내 '가슴 중앙(명치 살짝 위)' 높이에 오도록 의자 높이를 조절합니다. 날개뼈(어깨뼈) 두 개를 뒤로 모아 등받이에 꾹 고정하고 가슴을 살짝 내밉니다.",
-        steps: [
-          "손잡이를 어깨너비보다 넓게 잡고, 팔꿈치가 어깨보다 살짝 아래(몸통과 약 45~60도)에 오게 합니다.",
-          "어깨가 앞으로 딸려 나가지 않게 고정한 채, 가슴 근육의 힘으로 손잡이를 앞으로 밉니다.",
-          "가슴이 늘어나는 것을 느끼며 천천히(2초 동안) 손잡이가 가슴 옆에 올 때까지 돌아옵니다."
-        ],
-        breathing: "가슴 쪽으로 내릴 때 코로 마시고, 앞으로 밀 때 '후-' 뱉습니다.",
-        mistakes: [
-          "밀 때 어깨가 귀 쪽으로 으쓱 올라가거나 등받이에서 어깨가 떨어지면 어깨 관절만 아픕니다.",
-          "팔꿈치를 90도로 너무 높이 벌리면 어깨 충돌 증후군이 생길 수 있으니 살짝 내려주세요."
-        ]
+            "category": "chest",
+            "categoryKo": "가슴",
+            "match": [
+                  "바벨 벤치프레스",
+                  "벤치프레스"
+            ],
+            "title": "바벨 벤치프레스 (Barbell Bench Press)",
+            "target": "💪 가슴 전체 · 상체 미는 근력",
+            "gifs": [
+                  {
+                        "id": "EIeI8Vf",
+                        "label": "바벨 벤치프레스"
+                  }
+            ],
+            "setup": "벤치에 누워 눈높이에 바벨이 오게 하고, 어깨너비 1.5배로 바를 잡고 가슴 아치를 만듭니다.",
+            "steps": [
+                  "바벨을 랙에서 뽑아 가슴 중앙(젖꼭지 살짝 아래)으로 수직으로 천천히 내립니다.",
+                  "발바닥으로 바닥을 밀며 가슴 힘으로 바벨을 밀어 올립니다."
+            ],
+            "breathing": "바벨을 내릴 때 숨을 마시고, 밀어 올릴 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "손목이 뒤로 꺾이지 않게 바벨을 손바닥 아래쪽에 단단히 얹으세요."
+            ]
       },
       {
-        match: ["랫 풀 다운"],
-        title: "랫 풀 다운 (Lat Pull Down)",
-        target: "🦅 등 너비 (광배근)",
-        gifs: [
-          { id: "qdRxqCj", label: "1. 와이드 그립 (등 너비)" },
-          { id: "eYnzaCm", label: "2. 기본 그립 (측면 각도)" }
-        ],
-        setup: "바(Bar)를 어깨너비의 1.5배 정도로 넓게 잡은 뒤, 무릎 패드가 허벅지를 단단히 눌러주도록 높이를 맞춥니다. 상체를 뒤로 약 10~15도만 살짝 기울이고 가슴을 천장 쪽으로 들어 올립니다.",
-        steps: [
-          "바를 당기기 전에 먼저 '어깨(날개뼈)를 아래로 꾹 내리는 동작(숄더 패킹)'을 합니다.",
-          "손으로 잡아당긴다는 생각 대신, '팔꿈치를 내 옆구리 쪽으로 찍어 누른다'는 느낌으로 바를 쇄골(윗가슴) 쪽으로 당깁니다.",
-          "등이 팽팽하게 늘어나는 것을 느끼며 천천히 바를 위로 보내줍니다."
-        ],
-        breathing: "바를 가슴 쪽으로 당길 때 '후-' 내뱉고, 위로 올릴 때 코로 마십니다.",
-        mistakes: [
-          "몸을 뒤로 과하게 젖히며 반동으로 당기면 등 대신 허리와 팔만 쓰이게 됩니다.",
-          "바를 배꼽 쪽으로 너무 내리거나 목 뒤로 당기지 말고, 반드시 '쇄골/윗가슴' 앞으로 당기세요."
-        ]
+            "category": "chest",
+            "categoryKo": "가슴",
+            "match": [
+                  "인클라인 체스트 프레스",
+                  "인클라인 프레스"
+            ],
+            "title": "인클라인 체스트 프레스 머신 (Incline Press)",
+            "target": "🔥 윗가슴 (상부 대흉근) · 쇄골 라인",
+            "gifs": [
+                  {
+                        "id": "jHAnWmT",
+                        "label": "인클라인 체스트 프레스"
+                  }
+            ],
+            "setup": "의자 높이를 조절해 손잡이가 윗가슴(쇄골 5cm 아래) 높이에 오게 맞춥니다.",
+            "steps": [
+                  "어깨를 등받이에 고정한 채 대각선 위쪽 방향으로 가슴 윗부분을 쥐어짜며 밉니다.",
+                  "윗가슴이 팽팽하게 이완되는 것을 느끼며 천천히 내려옵니다."
+            ],
+            "breathing": "내릴 때 코로 마시고, 대각선으로 밀어 올릴 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "팔꿈치가 어깨보다 위로 과하게 들리지 않도록 살짝 아래로 내리세요."
+            ]
       },
       {
-        match: ["숄더 프레스"],
-        title: "숄더 프레스 머신 (Shoulder Press)",
-        target: "🥥 전면·측면 어깨 (삼각근)",
-        gifs: [{ id: "vqsbmL0", label: "숄더 프레스 머신" }],
-        setup: "의자 높이를 조절해 손잡이가 내 귀~어깨 높이에 오도록 맞춥니다. 허리가 과하게 꺾이지 않도록 배에 힘을 주고 등받이에 밀착합니다.",
-        steps: [
-          "손잡이를 잡고 전완근(아래팔)이 바닥과 수직이 되도록 세웁니다.",
-          "어깨(승모근)가 귀랑 가까워지지 않게 누른 상태에서 머리 위로 손잡이를 밀어 올립니다.",
-          "귀 높이(턱 선 근처)까지 무게를 버티며 천천히 내립니다."
-        ],
-        breathing: "위로 밀어 올릴 때 '후-' 내뱉고, 내릴 때 코로 들이마십니다.",
-        mistakes: [
-          "팔꿈치가 손목보다 뒤로 빠져 있으면 어깨 앞쪽 회전근개에 무리가 갑니다. 팔꿈치를 살짝만 앞으로 두세요."
-        ]
+            "category": "chest",
+            "categoryKo": "가슴",
+            "match": [
+                  "펙 덱 플라이",
+                  "체스트 플라이"
+            ],
+            "title": "펙 덱 플라이 머신 (Pec Deck Fly)",
+            "target": "🔥 가슴 안쪽 모아주기 (대흉근 안쪽 라인)",
+            "gifs": [
+                  {
+                        "id": "v3xmPAR",
+                        "label": "펙 덱 플라이 머신"
+                  }
+            ],
+            "setup": "패드나 손잡이를 잡았을 때 팔꿈치가 가슴 중앙 높이에 오도록 의자를 조절합니다.",
+            "steps": [
+                  "팔꿈치를 살짝만 구부린 채 고정하고 '큰 나무를 껴안는다'는 느낌으로 양손을 모읍니다.",
+                  "가슴 안쪽이 완전히 수축되면 1초 멈춘 뒤 천천히 가슴을 열어줍니다."
+            ],
+            "breathing": "팔을 모을 때 '후-' 뱉고, 벌릴 때 가슴을 펴며 코로 마십니다.",
+            "mistakes": [
+                  "어깨가 앞으로 말리며 모으지 마시고 가슴을 활짝 편 상태를 유지하세요."
+            ]
       },
       {
-        match: ["인클라인 프레스"],
-        title: "인클라인 체스트 프레스 머신 (윗가슴)",
-        target: "🔥 윗가슴 (상부 대흉근)",
-        gifs: [{ id: "jHAnWmT", label: "인클라인 프레스 머신" }],
-        setup: "벤치 각도가 30~45도 세워진 머신에 앉아 날개뼈를 뒤로 모아 고정합니다. 손잡이가 쇄골 살짝 아래(윗가슴) 높이에 오도록 의자를 맞춥니다.",
-        steps: [
-          "가슴을 천장 쪽으로 높게 들어 올린 상태를 유지합니다.",
-          "윗가슴 근육을 조이며 대각선 위쪽 방향으로 손잡이를 밀어 올립니다.",
-          "쇄골 아래 가슴이 스트레칭되는 느낌을 받으며 천천히 내려옵니다."
-        ],
-        breathing: "밀어 올릴 때 '후-' 뱉고, 내릴 때 코로 마십니다.",
-        mistakes: [
-          "가슴이 꺼지면 윗가슴 대신 앞어깨만 개입됩니다. 명치를 천장으로 계속 들어주세요."
-        ]
+            "category": "back",
+            "categoryKo": "등",
+            "match": [
+                  "랫 풀 다운"
+            ],
+            "title": "랫 풀 다운 (Lat Pull Down)",
+            "target": "🦅 등 너비 (광배근 · 역삼각형 상체)",
+            "gifs": [
+                  {
+                        "id": "qdRxqCj",
+                        "label": "1. 와이드 그립 (등 너비)"
+                  },
+                  {
+                        "id": "eYnzaCm",
+                        "label": "2. 기본 그립 (측면 각도)"
+                  }
+            ],
+            "setup": "바를 어깨너비 1.5배로 잡고 허벅지 패드를 단단히 고정한 뒤 상체를 10도 살짝 젖힙니다.",
+            "steps": [
+                  "어깨(날개뼈)를 먼저 아래로 내린 뒤 팔꿈치를 옆구리로 찍어 누르듯 쇄골 쪽으로 당깁니다.",
+                  "등 근육이 길게 늘어나는 것을 느끼며 천천히 시작 자세로 돌려보냅니다."
+            ],
+            "breathing": "바를 쇄골 쪽으로 당길 때 '후-' 뱉고, 올릴 때 마십니다.",
+            "mistakes": [
+                  "몸을 뒤로 과하게 젖혀 반동으로 당기지 마세요."
+            ]
       },
       {
-        match: ["시티드 케이블 로우"],
-        title: "시티드 케이블 로우 (Seated Cable Row)",
-        target: "🛡️ 등 중앙 두께 (승모근 중하부 · 광배근)",
-        gifs: [{ id: "fUBheHs", label: "시티드 케이블 로우" }],
-        setup: "발판에 발을 대고 무릎을 살짝 구부린 뒤, 허리를 곧게 펴고 가슴(명치)을 앞으로 내밉니다.",
-        steps: [
-          "손잡이를 잡은 상태에서 어깨와 날개뼈를 앞으로 살짝 보내 등을 길게 늘려줍니다.",
-          "가슴을 내밀면서 팔꿈치를 몸통 스치듯 뒤로 당겨 손잡이를 배꼽 위(명치 아래) 쪽으로 가져옵니다.",
-          "등 가운데(날개뼈 사이)가 꽉 조여진 상태에서 1초 버틴 후 천천히 돌아갑니다."
-        ],
-        breathing: "몸 쪽으로 당길 때 '후-' 내뱉고, 팔을 뻗을 때 코로 마십니다.",
-        mistakes: [
-          "당길 때 어깨가 으쓱 올라가면 승모근 위쪽(목)만 뭉칩니다. 어깨를 낮추고 당기세요."
-        ]
+            "category": "back",
+            "categoryKo": "등",
+            "match": [
+                  "시티드 케이블 로우",
+                  "케이블 로우",
+                  "시티드 로우"
+            ],
+            "title": "시티드 케이블 로우 (Seated Cable Row)",
+            "target": "🛡️ 등 중앙 두께 (승모근 중하부 · 광배근)",
+            "gifs": [
+                  {
+                        "id": "fUBheHs",
+                        "label": "시티드 케이블 로우"
+                  }
+            ],
+            "setup": "발판에 발을 대고 무릎을 살짝 구부린 뒤 상체를 곧게 펴고 V바 손잡이를 잡습니다.",
+            "steps": [
+                  "가슴을 펴면서 팔꿈치를 뒤로 당겨 배꼽 쪽으로 손잡이를 당겨옵니다.",
+                  "날개뼈 두 개를 서로 꽉 맞닿게 1초 조인 뒤 천천히 이완합니다."
+            ],
+            "breathing": "배꼽으로 당길 때 '후-' 뱉고, 팔을 뻗을 때 코로 마십니다.",
+            "mistakes": [
+                  "허리를 앞으로 구부정하게 굽히지 마세요."
+            ]
       },
       {
-        match: ["원암 덤벨 로우", "로우 머신"],
-        title: "원암 덤벨 로우 (One-Arm Dumbbell Row)",
-        target: "🦅 광배근 하부 · 등 전체",
-        gifs: [{ id: "C0MA9bC", label: "원암 덤벨 로우" }],
-        setup: "벤치에 한 손과 한쪽 무릎을 짚고 허리를 평평하게 폅니다. 반대쪽 손으로 덤벨을 쥐고 바닥 쪽으로 자연스럽게 늘어뜨립니다.",
-        steps: [
-          "덤벨을 수직으로 들지 말고, 내 '골반(바지 주머니)' 쪽을 향해 포물선을 그리며 팔꿈치를 뒤로 당깁니다.",
-          "등 옆쪽(광배근)이 꽉 수축된 것을 느낀 뒤 천천히 덤벨을 내려 광배근을 늘려줍니다."
-        ],
-        breathing: "당길 때 '후-' 내뱉고, 내릴 때 코로 마십니다.",
-        mistakes: [
-          "팔 힘으로만 가슴 쪽으로 당기면 이두근과 어깨만 아픕니다. 팔꿈치를 골반 쪽으로 보내세요!"
-        ]
+            "category": "back",
+            "categoryKo": "등",
+            "match": [
+                  "어시스트 풀업",
+                  "풀업",
+                  "턱걸이"
+            ],
+            "title": "어시스트 풀업 머신 (Assisted Pull-up)",
+            "target": "🦅 등 전체 너비 (광배근 · 상체 역삼각형)",
+            "gifs": [
+                  {
+                        "id": "kiJ4Z2K",
+                        "label": "어시스트 풀업 머신"
+                  }
+            ],
+            "setup": "보조 발판(또는 무릎 패드)에 무릎을 얹고 손잡이를 어깨너비보다 넓게 잡습니다.",
+            "steps": [
+                  "가슴을 살짝 천장으로 들어 올리며 팔꿈치를 옆구리 쪽으로 내리찍어 몸을 끌어올립니다.",
+                  "턱이 바 높이에 오면 1초 멈춘 뒤 등이 팽팽하게 늘어나는 것을 느끼며 내려옵니다."
+            ],
+            "breathing": "몸을 끌어올릴 때 '후-' 뱉고, 내려갈 때 들이마십니다.",
+            "mistakes": [
+                  "어깨가 귀에 닿을 정도로 으쓱 처진 채로 매달리지 마세요."
+            ]
       },
       {
-        match: ["사이드 레터럴 레이즈"],
-        title: "덤벨 사이드 레터럴 레이즈 (사레레)",
-        target: "↔️ 옆어깨 (측면 삼각근 - 어깨 넓어지는 운동)",
-        gifs: [{ id: "DsgkuIt", label: "덤벨 사이드 레터럴 레이즈" }],
-        setup: "가벼운 덤벨(4~5kg)을 양손에 들고 섭니다. 팔꿈치를 아주 살짝만 구부리고 어깨(승모근)에 힘을 뺍니다.",
-        steps: [
-          "덤벨을 위로 든다는 생각 대신, '내 주먹을 양옆 벽 쪽으로 멀리 던진다'는 느낌으로 옆으로 들어 올립니다.",
-          "손목이 어깨와 일직선(또는 살짝 아래)이 될 때까지만 올립니다.",
-          "어깨 옆쪽의 뻐근한 긴장이 풀리지 않게 허벅지 옆까지 천천히(2초) 내립니다."
-        ],
-        breathing: "옆으로 들어 올릴 때 '후-' 뱉고, 내릴 때 코로 마십니다.",
-        mistakes: [
-          "무거운 무게로 욕심내어 몸을 위아래로 반동 주면 옆어깨 대신 목(승모근)만 두꺼워집니다!"
-        ]
+            "category": "back",
+            "categoryKo": "등",
+            "match": [
+                  "원암 덤벨 로우",
+                  "덤벨 로우"
+            ],
+            "title": "원암 덤벨 로우 (One-Arm Dumbbell Row)",
+            "target": "🦅 광배근 하부 · 등 전체 고립",
+            "gifs": [
+                  {
+                        "id": "C0MA9bC",
+                        "label": "원암 덤벨 로우"
+                  }
+            ],
+            "setup": "한쪽 무릎과 손을 평벤치에 대고 상체를 바닥과 수평에 가깝게 유지합니다.",
+            "steps": [
+                  "반대쪽 손에 덤벨을 들고 팔꿈치를 골반(호주머니) 쪽으로 끌어당깁니다.",
+                  "등 근육이 강하게 쥐어짜이면 1초 멈춘 뒤 천천히 내립니다."
+            ],
+            "breathing": "덤벨을 들어 올릴 때 '후-' 뱉고, 내릴 때 마십니다.",
+            "mistakes": [
+                  "상체를 옆으로 비틀면서 반동으로 당기지 마세요."
+            ]
       },
       {
-        match: ["덤벨 컬(이두)"],
-        title: "덤벨 컬(이두) & 케이블 푸쉬다운(삼두)",
-        target: "💪 팔 앞쪽(이두근) & 팔 뒤쪽(삼두근)",
-        gifs: [
-          { id: "NbVPDMW", label: "1. 덤벨 이두 컬" },
-          { id: "gAwDzB3", label: "2. 케이블 삼두 푸쉬다운" }
-        ],
-        setup: "팔 운동의 유일한 핵심은 '팔꿈치를 내 옆구리에 본드로 붙인 듯 고정하는 것'입니다.",
-        steps: [
-          "[덤벨 컬] 팔꿈치를 옆구리에 고정한 채, 아래팔만 접어 덤벨을 어깨 쪽으로 들어 올리고 천천히 내립니다.",
-          "[케이블 푸쉬다운] 상체를 살짝 숙이고 팔꿈치를 옆구리에 고정한 채, 바를 허벅지 쪽으로 끝까지 눌러 팔 뒤쪽을 쥐어짭니다."
-        ],
-        breathing: "힘을 주어 구부리거나 누를 때 '후-' 뱉고, 돌아올 때 마십니다.",
-        mistakes: [
-          "무게를 들려고 팔꿈치가 앞뒤로 흔들리면 팔 근육 대신 어깨가 일을 하게 됩니다."
-        ]
+            "category": "shoulder",
+            "categoryKo": "어깨",
+            "match": [
+                  "숄더 프레스 머신",
+                  "숄더 프레스"
+            ],
+            "title": "숄더 프레스 머신 (Shoulder Press)",
+            "target": "🥥 전면·측면 어깨 (삼각근 볼륨)",
+            "gifs": [
+                  {
+                        "id": "vqsbmL0",
+                        "label": "숄더 프레스 머신"
+                  }
+            ],
+            "setup": "손잡이가 귀 높이쯤에 오도록 의자를 맞추고 날개뼈를 등받이에 고정합니다.",
+            "steps": [
+                  "승모근이 으쓱 올라가지 않게 어깨를 누른 상태에서 손잡이를 머리 위로 밉니다.",
+                  "팔꿈치가 90도가 되는 귀 높이까지 천천히 버티며 내려옵니다."
+            ],
+            "breathing": "위로 밀어 올릴 때 '후-' 뱉고, 내릴 때 마십니다.",
+            "mistakes": [
+                  "허리를 과하게 꺾어서 가슴으로 밀지 마세요."
+            ]
       },
       {
-        match: ["케이블 푸쉬다운(삼두)", "해머 컬"],
-        title: "케이블 푸쉬다운(삼두) & 덤벨 해머 컬(이두)",
-        target: "💪 삼두근 · 상완근 · 전완근",
-        gifs: [
-          { id: "gAwDzB3", label: "1. 케이블 삼두 푸쉬다운" },
-          { id: "slDvUAU", label: "2. 덤벨 해머 컬" }
-        ],
-        setup: "팔꿈치를 옆구리에 단단히 고정하고 반동을 최소화합니다. 해머 컬은 덤벨을 세로(망치 쥐듯)로 잡습니다.",
-        steps: [
-          "[케이블 푸쉬다운] 팔꿈치를 고정하고 케이블 바를 허벅지 앞까지 완전히 펴서 삼두근을 1초 수축합니다.",
-          "[해머 컬] 손등이 바깥을 향하게 세로로 덤벨을 쥐고 그대로 접어 올려 팔 바깥쪽과 전완근을 키웁니다."
-        ],
-        breathing: "수축할 때 '후-' 뱉고, 이완할 때 코로 마십니다.",
-        mistakes: [
-          "손목이 꺾이지 않도록 손목 중립을 단단히 유지하세요."
-        ]
+            "category": "shoulder",
+            "categoryKo": "어깨",
+            "match": [
+                  "덤벨 사이드 레터럴 레이즈",
+                  "사이드 레터럴 레이즈",
+                  "사레레"
+            ],
+            "title": "덤벨 사이드 레터럴 레이즈 (사레레)",
+            "target": "↔️ 옆어깨 (측면 삼각근 - 어깨 프레임 넓어지는 핵심)",
+            "gifs": [
+                  {
+                        "id": "DsgkuIt",
+                        "label": "덤벨 사이드 레터럴 레이즈"
+                  }
+            ],
+            "setup": "가벼운 덤벨(3~5kg)을 들고 상체를 아주 살짝(5도) 앞으로 숙입니다.",
+            "steps": [
+                  "손을 드는 것이 아니라 '팔꿈치로 물을 붓는다'는 느낌으로 양옆으로 들어 올립니다.",
+                  "팔이 어깨높이까지 올라오면 0.5초 정지 후 천천히 내립니다."
+            ],
+            "breathing": "올릴 때 '후-' 뱉고, 내릴 때 천천히 마십니다.",
+            "mistakes": [
+                  "무거운 무게로 몸을 튕기며 반동을 쓰지 마세요."
+            ]
       },
       {
-        match: ["고블릿 스쿼트", "바벨 스쿼트"],
-        title: "덤벨 고블릿 스쿼트 / 바벨 스쿼트",
-        target: "🦵 하체 전체 · 코어 · 둔근",
-        gifs: [
-          { id: "yn8yg1r", label: "1. 덤벨 고블릿 스쿼트" },
-          { id: "qXTaZnJ", label: "2. 바벨 스쿼트" }
-        ],
-        setup: "발을 어깨너비보다 살짝 넓게 벌리고 발끝을 바깥으로 약 15~30도 벌립니다. 초보자는 덤벨 하나(16~20kg)를 가슴 앞에 양손으로 감싸 안고 하는 '고블릿 스쿼트'가 자세 잡기에 최고입니다.",
-        steps: [
-          "배에 숨을 들이마셔 복압(배 힘)을 단단히 잡습니다.",
-          "고관절(팬티라인)과 무릎을 동시에 접으며 의자에 앉듯 허벅지가 바닥과 평행해질 때까지 내려갑니다.",
-          "발바닥 전체로 바닥을 밀어내며 상체 각도를 유지한 채 일어납니다."
-        ],
-        breathing: "내려가기 전 코로 깊게 마셔 배를 채우고, 일어나면서 '후-' 내뱉습니다.",
-        mistakes: [
-          "일어날 때 무릎이 안쪽으로 모이지 않도록 무릎을 발끝 방향으로 계속 벌려주세요."
-        ]
+            "category": "shoulder",
+            "categoryKo": "어깨",
+            "match": [
+                  "리어 델트 플라이 머신",
+                  "리어 델트",
+                  "페이스풀"
+            ],
+            "title": "리어 델트 플라이 머신 (후면 어깨)",
+            "target": "🥥 후면 삼각근 (입체적인 어깨 · 굽은 어깨 교정)",
+            "gifs": [
+                  {
+                        "id": "myfUsKf",
+                        "label": "리어 델트 플라이 머신"
+                  }
+            ],
+            "setup": "머신을 마주 보고 가슴 패드에 밀착하여 앉고, 손잡이가 어깨높이에 오게 합니다.",
+            "steps": [
+                  "날개뼈를 접지 말고 팔꿈치를 양옆 바깥으로 멀리 밀어낸다는 느낌으로 벌립니다.",
+                  "후면 어깨에 찌릿한 자극을 느끼며 1초 멈춘 뒤 천천히 모아줍니다."
+            ],
+            "breathing": "팔을 벌릴 때 '후-' 뱉고, 모을 때 마십니다.",
+            "mistakes": [
+                  "등 근육(날개뼈)을 너무 접으면 어깨가 아니라 등이 쓰입니다."
+            ]
       },
       {
-        match: ["레그 익스텐션"],
-        title: "레그 익스텐션 (Leg Extension)",
-        target: "🦵 앞허벅지 고립 (대퇴사두근)",
-        gifs: [{ id: "my33uHU", label: "레그 익스텐션 머신" }],
-        setup: "의자에 깊숙이 앉았을 때 기구의 회전축과 내 무릎 옆선이 일치하도록 등받이를 조절합니다. 발목 패드는 발목 바로 위(정강이 맨 아래)에 오게 맞춥니다.",
-        steps: [
-          "양손으로 의자 옆 손잡이를 꽉 잡아 엉덩이가 들썩이지 않게 고정합니다.",
-          "발끝을 정강이 쪽으로 당긴 상태(ㄱ자)에서 다리를 쭉 펴며 패드를 들어 올립니다.",
-          "다리를 다 편 정점에서 1초간 앞허벅지를 강하게 쥐어짠 뒤 천천히 내립니다."
-        ],
-        breathing: "다리를 들어 올릴 때 '후-' 뱉고, 내릴 때 코로 마십니다.",
-        mistakes: [
-          "반동으로 뻥 차올리면 무릎 인대에 부담이 갑니다. 정점에서 1초 멈추는 컨트롤이 핵심입니다."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "45° 레그 프레스",
+                  "레그 프레스"
+            ],
+            "title": "45° 레그 프레스 (Leg Press)",
+            "target": "🦵 하체 전체 (앞허벅지 · 둔근)",
+            "gifs": [
+                  {
+                        "id": "10Z2DXU",
+                        "label": "45° 레그 프레스 머신"
+                  }
+            ],
+            "setup": "등받이에 엉덩이와 허리를 밀착시키고, 발판 중앙에 발을 어깨너비로 둡니다.",
+            "steps": [
+                  "안전바를 풀고 무릎이 90도가 될 때까지 천천히(2~3초) 발판을 내립니다.",
+                  "발바닥 전체(뒤꿈치)로 발판을 강하게 밀어 올립니다 (무릎은 95%만 펴기)."
+            ],
+            "breathing": "내릴 때 마시고, 밀어 올릴 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "무릎을 끝까지 팍 펴서 관절을 잠그지 마세요."
+            ]
       },
       {
-        match: ["레그 컬"],
-        title: "시티드 레그 컬 (Seated Leg Curl)",
-        target: "🦵 뒷허벅지 (햄스트링)",
-        gifs: [{ id: "Zg3XY7P", label: "시티드 레그 컬 머신" }],
-        setup: "무릎 위치가 기구 회전축에 오도록 맞추고, 발목 패드가 아킬레스건 바로 위쪽에 걸리도록 조절합니다. 허벅지 위 패드로 다리를 단단히 고정합니다.",
-        steps: [
-          "엉덩이를 등받이에 단단히 밀착시킵니다.",
-          "뒤꿈치로 의자 아래쪽을 감아 찬다는 느낌으로 무릎을 강하게 구부려 패드를 당깁니다.",
-          "뒷허벅지의 긴장을 유지하며 천천히(2~3초) 다리를 폅니다."
-        ],
-        breathing: "다리를 구부려 당길 때 '후-' 내뱉고, 펼 때 코로 마십니다.",
-        mistakes: [
-          "내릴 때 힘을 확 풀어버리지 말고 끝까지 뒷허벅지 힘으로 버티며 펴주세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "바벨 스쿼트",
+                  "스쿼트"
+            ],
+            "title": "바벨 스쿼트 (Barbell Squat)",
+            "target": "🦵 하체 전체 · 둔근 · 코어",
+            "gifs": [
+                  {
+                        "id": "qXTaZnJ",
+                        "label": "바벨 스쿼트"
+                  }
+            ],
+            "setup": "바벨을 승모근 위에 얹고, 발을 어깨너비로 벌려 발끝을 살짝 바깥으로 둡니다.",
+            "steps": [
+                  "가슴을 펴고 복압을 채운 뒤 엉덩이를 뒤로 빼며 고관절을 접어 앉습니다.",
+                  "허벅지가 바닥과 수평이 될 때까지 앉은 후 발바닥으로 바닥을 밀며 일어섭니다."
+            ],
+            "breathing": "내려가기 전 숨을 채워 복압을 잡고, 일어나며 '후-' 뱉습니다.",
+            "mistakes": [
+                  "무릎이 안쪽으로 모이지 않게 발끝 방향으로 열어주세요."
+            ]
       },
       {
-        match: ["어시스트 풀업"],
-        title: "어시스트 풀업 (턱걸이 보조 머신)",
-        target: "🦅 등 전체 너비 (광배근)",
-        gifs: [{ id: "kiJ4Z2K", label: "어시스트 풀업 머신" }],
-        setup: "주의! 이 머신은 '무게를 높게 설정할수록 나를 위로 더 많이 밀어줘서 쉬워지는' 구조입니다. 71kg 초보자 기준 25~35kg 보조 무게로 시작하세요.",
-        steps: [
-          "손잡이를 어깨보다 넓게 잡고 무릎 패드 위에 양 무릎을 올립니다.",
-          "어깨를 먼저 아래로 내린 뒤, 내 윗가슴이 바에 닿는다는 느낌으로 몸을 끌어올립니다.",
-          "팔꿈치를 천천히 펴며 광배근이 끝까지 늘어나는 것을 느끼며 내려옵니다."
-        ],
-        breathing: "몸을 당겨 올라갈 때 '후-' 뱉고, 내려올 때 코로 마십니다.",
-        mistakes: [
-          "턱만 치켜들고 어깨가 말리면 등 자극이 사라집니다. 가슴을 활짝 편 채 올라가세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "덤벨 고블릿 스쿼트",
+                  "고블릿 스쿼트"
+            ],
+            "title": "덤벨 고블릿 스쿼트 (Goblet Squat)",
+            "target": "🦵 앞허벅지 · 둔근 · 하체 균형",
+            "gifs": [
+                  {
+                        "id": "yn8yg1r",
+                        "label": "덤벨 고블릿 스쿼트"
+                  }
+            ],
+            "setup": "덤벨 하나를 양손으로 감싸 가슴 앞에 꼭 껴안고 바르게 섭니다.",
+            "steps": [
+                  "상체를 꼿꼿이 세운 상태로 팔꿈치가 무릎 안쪽에 닿을 정도로 깊게 앉습니다.",
+                  "발뒤꿈치로 바닥을 힘차게 밀며 일어섭니다."
+            ],
+            "breathing": "앉을 때 코로 마시고, 일어서며 '후-' 뱉습니다.",
+            "mistakes": [
+                  "상체가 앞으로 쏟아지지 않게 가슴을 활짝 펴세요."
+            ]
       },
       {
-        match: ["펙 덱 플라이"],
-        title: "펙 덱 플라이 머신 (Pec Deck Fly)",
-        target: "💪 가슴 안쪽 라인 (대흉근 내측)",
-        gifs: [{ id: "v3xmPAR", label: "펙 덱 플라이 머신" }],
-        setup: "등받이에 등을 대고 앉아 손잡이가 가슴 중앙 높이에 오도록 의자를 조절합니다. 날개뼈를 뒤로 모아 가슴을 폅니다.",
-        steps: [
-          "팔꿈치를 살짝만 구부린 채, 아름드리 큰 나무를 껴안듯 양팔을 가슴 앞으로 모읍니다.",
-          "양 손잡이가 만나는 지점에서 가슴 안쪽을 1초간 강하게 쥐어짠 뒤, 가슴이 늘어나는 걸 느끼며 천천히 벌립니다."
-        ],
-        breathing: "양팔을 모을 때 '후-' 뱉고, 벌릴 때 코로 마십니다.",
-        mistakes: [
-          "팔을 너무 뒤로 과하게 젖히면 어깨 앞쪽 관절이 다칠 수 있으니 내 몸통 선까지만 벌리세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "덤벨 런지",
+                  "스플릿 스쿼트",
+                  "런지"
+            ],
+            "title": "덤벨 런지 (Dumbbell Lunge)",
+            "target": "🍑 한쪽 하체 집중 · 둔근(힙업)",
+            "gifs": [
+                  {
+                        "id": "RRWFUcw",
+                        "label": "덤벨 런지"
+                  }
+            ],
+            "setup": "양손에 덤벨을 들고 다리를 앞뒤로 넓게 벌리고 섭니다.",
+            "steps": [
+                  "뒤쪽 무릎이 바닥에 닿기 직전까지 수직으로 앉아 내려갑니다.",
+                  "앞발 뒤꿈치와 엉덩이 힘으로 바닥을 밀어 일어납니다."
+            ],
+            "breathing": "앉을 때 마시고, 일어날 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "앞뒤 보폭을 충분히 넓혀 앞무릎이 발끝보다 너무 튀어나가지 않게 하세요."
+            ]
       },
       {
-        match: ["리어 델트 플라이"],
-        title: "리어 델트 플라이 머신 (후면 어깨)",
-        target: "🥥 뒷어깨 (후면 삼각근 · 라운드숄더 교정)",
-        gifs: [{ id: "myfUsKf", label: "리어 델트 플라이 머신" }],
-        setup: "펙 덱 플라이 머신을 거꾸로(가슴을 패드에 대고) 앉습니다. 손잡이가 내 어깨 높이와 수평이 되도록 의자를 조절합니다.",
-        steps: [
-          "어깨가 으쓱 올라가지 않게 누른 상태에서, 손이 아닌 '팔꿈치로 뒤쪽 벽을 민다'는 느낌으로 양팔을 옆으로 벌립니다.",
-          "어깨 뒤쪽이 뻐근하게 수축되는 지점까지만 벌린 뒤 천천히 돌아옵니다."
-        ],
-        breathing: "뒤로 벌릴 때 '후-' 뱉고, 모을 때 코로 마십니다.",
-        mistakes: [
-          "날개뼈를 너무 꽉 조이면 뒷어깨 대신 등(승모근)만 운동됩니다. 팔을 바깥으로 길게 뻗으며 벌리세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "레그 익스텐션"
+            ],
+            "title": "레그 익스텐션 (Leg Extension)",
+            "target": "🦵 앞허벅지 고립 (대퇴사두근 빗살무늬)",
+            "gifs": [
+                  {
+                        "id": "my33uHU",
+                        "label": "레그 익스텐션 머신"
+                  }
+            ],
+            "setup": "등받이에 엉덩이를 붙이고 발목 패드가 발목 바로 위에 오도록 조절합니다.",
+            "steps": [
+                  "손잡이를 잡고 앞허벅지 힘으로 다리를 끝까지 차올립니다.",
+                  "정점에서 1초간 허벅지를 단단히 조인 뒤 천천히 버티며 내립니다."
+            ],
+            "breathing": "다리를 찰 때 '후-' 뱉고, 내릴 때 마십니다.",
+            "mistakes": [
+                  "엉덩이가 의자에서 붕 뜨지 않게 손잡이를 아래로 당기며 고정하세요."
+            ]
       },
       {
-        match: ["루마니안 데드리프트"],
-        title: "루마니안 데드리프트 (Barbell / Dumbbell RDL)",
-        target: "⚡ 뒷허벅지 · 둔근 · 척추기립근",
-        gifs: [
-          { id: "wQ2c4XD", label: "1. 바벨 루마니안 데드리프트" },
-          { id: "rR0LJzx", label: "2. 덤벨 루마니안 데드리프트" }
-        ],
-        setup: "발을 골반 너비로 두고 바벨이나 덤벨을 허벅지 앞에 가볍게 붙여 듭니다. 가슴을 펴고 허리는 일자(중립)로 곧게 유지합니다.",
-        steps: [
-          "무릎은 살짝만(15도) 구부린 채 고정하고, '내 엉덩이로 뒤에 있는 문을 닫는다'는 느낌으로 엉덩이를 뒤로 쭉 뺍니다.",
-          "바벨/덤벨이 내 허벅지와 정강이를 스치듯 내려가며, 뒷허벅지가 팽팽하게 당기는 지점(무릎 살짝 아래)까지만 내려갑니다.",
-          "발바닥으로 바닥을 밀며 엉덩이를 앞으로 조여 상체를 세웁니다."
-        ],
-        breathing: "내려갈 때 코로 마시며 복압을 잡고, 올라올 때 '후-' 내뱉습니다.",
-        mistakes: [
-          "바벨이 내 다리에서 멀어지면 허리에 큰 부담이 갑니다. 바벨을 다리에 스치듯 붙여서 움직이세요!"
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "시티드 레그 컬",
+                  "레그 컬"
+            ],
+            "title": "시티드 레그 컬 (Seated Leg Curl)",
+            "target": "🦵 뒷허벅지 (햄스트링 단단함)",
+            "gifs": [
+                  {
+                        "id": "Zg3XY7P",
+                        "label": "시티드 레그 컬 머신"
+                  }
+            ],
+            "setup": "허벅지 윗패드를 무릎 바로 위에 단단히 누르고, 발목 패드를 아킬레스건 뒤에 둡니다.",
+            "steps": [
+                  "뒷허벅지 힘으로 발목 패드를 엉덩이 밑 쪽으로 빠르게 감아 당깁니다.",
+                  "햄스트링이 늘어나는 자극을 느끼며 2~3초간 천천히 버티며 올라옵니다."
+            ],
+            "breathing": "다리를 접어 내릴 때 '후-' 뱉고, 펼 때 마십니다.",
+            "mistakes": [
+                  "다리를 올릴 때 무게추가 쾅 부딪히지 않게 끝까지 버티세요."
+            ]
       },
       {
-        match: ["덤벨 런지", "스플릿 스쿼트"],
-        title: "덤벨 런지 / 스플릿 스쿼트 (Lunge)",
-        target: "🍑 한쪽 하체 집중 · 둔근(힙업)",
-        gifs: [{ id: "RRWFUcw", label: "덤벨 런지" }],
-        setup: "양손에 덤벨을 들고 다리를 앞뒤로 넓게 벌리고 섭니다. 상체를 곧게 세우거나 앞으로 아주 살짝만(10도) 숙여 앞쪽 엉덩이에 체중을 싣습니다.",
-        steps: [
-          "뒤쪽 무릎이 바닥에 거의 닿기 직전까지 수직으로 앉아 내려갑니다 (앞무릎 각도 약 90도).",
-          "앞발의 뒤꿈치와 앞쪽 엉덩이 힘으로 바닥을 강하게 밀어 올라옵니다."
-        ],
-        breathing: "내려갈 때 마시고, 밀어 올라올 때 '후-' 뱉습니다.",
-        mistakes: [
-          "보폭이 너무 좁으면 무릎만 앞으로 튀어나와 무릎이 아픕니다. 앞뒤 간격을 충분히 넓히세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "바벨 루마니안 데드리프트",
+                  "루마니안 데드리프트",
+                  "데드리프트"
+            ],
+            "title": "바벨 루마니안 데드리프트 (Barbell RDL)",
+            "target": "⚡ 뒷허벅지 · 둔근 · 척추기립근",
+            "gifs": [
+                  {
+                        "id": "wQ2c4XD",
+                        "label": "바벨 루마니안 데드리프트"
+                  }
+            ],
+            "setup": "발을 골반 너비로 두고 바벨을 허벅지 앞에 붙입니다. 가슴을 펴고 허리를 일자로 유지합니다.",
+            "steps": [
+                  "무릎을 살짝만 굽힌 채 엉덩이를 뒤로 쭉 빼며 바벨을 다리에 스치듯 내립니다.",
+                  "뒷허벅지가 팽팽해지면 발바닥으로 바닥을 밀며 엉덩이를 조여 일어납니다."
+            ],
+            "breathing": "내려갈 때 마시고, 일어설 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "바벨이 허벅지에서 멀어지면 허리에 무리가 가니 반드시 몸에 붙이세요."
+            ]
       },
       {
-        match: ["힙 어브덕션"],
-        title: "힙 어브덕션 머신 (Hip Abduction)",
-        target: "🍑 엉덩이 옆쪽 (중둔근 · 골반 라인)",
-        gifs: [{ id: "CHpahtl", label: "시티드 힙 어브덕션 머신" }],
-        setup: "머신에 앉아 양 무릎 바깥쪽을 패드에 댑니다. 등받이에 기대거나 상체를 살짝 앞으로 숙여 고관절을 접어줍니다.",
-        steps: [
-          "무릎이나 발의 힘이 아니라 '엉덩이 바깥쪽' 힘으로 패드를 양옆으로 힘껏 벌립니다.",
-          "최대한 벌린 지점에서 1초간 엉덩이 옆이 타들어 가는 느낌을 유지한 뒤 천천히 오므립니다."
-        ],
-        breathing: "다리를 벌릴 때 '후-' 뱉고, 오므릴 때 코로 마십니다.",
-        mistakes: [
-          "다리를 모을 때 무게추끼리 쾅 부딪히게 힘 빼지 말고 끝까지 버티며 오므리세요."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "덤벨 루마니안 데드리프트",
+                  "덤벨 데드리프트"
+            ],
+            "title": "덤벨 루마니안 데드리프트 (Dumbbell RDL)",
+            "target": "⚡ 뒷허벅지 · 둔근 집중",
+            "gifs": [
+                  {
+                        "id": "rR0LJzx",
+                        "label": "덤벨 루마니안 데드리프트"
+                  }
+            ],
+            "setup": "양손에 덤벨을 들고 허벅지 앞에 둡니다. 가슴을 펴고 복압을 유지합니다.",
+            "steps": [
+                  "엉덩이를 뒤로 밀어내며 덤벨을 정강이 중간까지 천천히 내립니다.",
+                  "햄스트링의 탄성을 이용해 엉덩이를 수축하며 바로 섭니다."
+            ],
+            "breathing": "내릴 때 마시고, 올라올 때 '후-' 뱉습니다.",
+            "mistakes": [
+                  "허리가 둥글게 말리지 않도록 허리를 곧게 펴세요."
+            ]
       },
       {
-        match: ["크런치", "레그 레이즈"],
-        title: "크런치 (Crunch) & 복근 운동",
-        target: "🍫 상복부 · 복직근 전체",
-        gifs: [
-          { id: "TFqbd8t", label: "1. 바닥 크런치" },
-          { id: "VBAWRPG", label: "2. 플랭크 (코어)" }
-        ],
-        setup: "매트 위에 누워 무릎을 세웁니다. 손은 귀 옆이나 머리 뒤에 가볍게 대기만 하고 목을 잡아당기지 않습니다.",
-        steps: [
-          "머리를 드는 게 아니라 '명치를 골반 쪽으로 구부려 윗배를 접는다'는 느낌으로 날개뼈만 바닥에서 뗍니다.",
-          "윗배가 단단히 수축된 정점에서 숨을 끝까지 뱉으며 1초 버틴 후 천천히 내려옵니다."
-        ],
-        breathing: "상체를 말아 올릴 때 입으로 숨을 끝까지 '후~' 뱉어야 복근이 깊게 조여집니다.",
-        mistakes: [
-          "팔 힘으로 뒤통수를 세게 잡아당기면 목 디스크에 무리가 갑니다."
-        ]
+            "category": "leg",
+            "categoryKo": "하체",
+            "match": [
+                  "힙 어브덕션 머신",
+                  "힙 어브덕션"
+            ],
+            "title": "힙 어브덕션 머신 (Hip Abduction)",
+            "target": "🍑 엉덩이 옆쪽 (중둔근 · 골반 라인)",
+            "gifs": [
+                  {
+                        "id": "CHpahtl",
+                        "label": "시티드 힙 어브덕션 머신"
+                  }
+            ],
+            "setup": "머신에 앉아 양 무릎 바깥쪽을 패드에 대고 상체를 살짝 앞으로 숙입니다.",
+            "steps": [
+                  "엉덩이 바깥쪽 힘으로 패드를 양옆으로 끝까지 힘껏 벌립니다.",
+                  "최대로 벌린 지점에서 1초간 버틴 후 천천히 모읍니다."
+            ],
+            "breathing": "벌릴 때 '후-' 뱉고, 모을 때 마십니다.",
+            "mistakes": [
+                  "발목 힘이 아니라 엉덩이 근육으로 미는 느낌에 집중하세요."
+            ]
       },
       {
-        match: ["플랭크"],
-        title: "플랭크 (Front Plank 코어 버티기)",
-        target: "🍫 코어 전체 · 복횡근 · 둔근",
-        gifs: [
-          { id: "VBAWRPG", label: "1. 프론트 플랭크" },
-          { id: "TFqbd8t", label: "2. 바닥 크런치" }
-        ],
-        setup: "매트에 엎드려 팔꿈치를 어깨 바로 수직 아래에 둡니다. 발끝을 세워 몸을 띄웁니다.",
-        steps: [
-          "머리-등-엉덩이-발뒤꿈치가 일직선이 되도록 맞춥니다.",
-          "배꼽을 등 쪽으로 당기고 엉덩이(괄약근)에 강한 힘을 쥐어짠 상태로 45~60초간 버팁니다."
-        ],
-        breathing: "숨을 참지 말고 짧고 강하게 호흡하며 복부 긴장을 유지합니다.",
-        mistakes: [
-          "허리가 바닥 쪽으로 처지면 복근이 아니라 허리만 아픕니다. 허리가 아프면 엉덩이를 살짝 올리고 배를 말아주세요."
-        ]
+            "category": "arm",
+            "categoryKo": "팔",
+            "match": [
+                  "덤벨 이두 컬",
+                  "덤벨 컬"
+            ],
+            "title": "덤벨 이두 컬 (Dumbbell Biceps Curl)",
+            "target": "💪 팔 앞쪽 (이두근 알통)",
+            "gifs": [
+                  {
+                        "id": "NbVPDMW",
+                        "label": "덤벨 이두 컬"
+                  }
+            ],
+            "setup": "양손에 덤벨을 들고 팔꿈치를 옆구리에 단단히 고정합니다.",
+            "steps": [
+                  "팔꿈치를 움직이지 않고 손목을 살짝 바깥으로 돌리며 덤벨을 들어 올립니다.",
+                  "이두근을 최고점에서 1초 쥐어짠 뒤 천천히 저항하며 내립니다."
+            ],
+            "breathing": "덤벨을 올릴 때 '후-' 뱉고, 내릴 때 마십니다.",
+            "mistakes": [
+                  "팔꿈치가 앞뒤로 흔들리거나 허리를 젖히는 반동을 쓰지 마세요."
+            ]
       },
       {
-        match: ["트레드밀", "유산소", "워밍업"],
-        title: "트레드밀 경사 빠르게 걷기 (인클라인 워킹)",
-        target: "🔥 체지방 연소 · 심폐 지구력 (근손실 방지)",
-        gifs: [{ id: "rjiM4L3", label: "트레드밀 인클라인 경사 걷기" }],
-        setup: "런닝머신(트레드밀)에 올라가 시작 버튼을 누른 뒤, 경사도(Incline) 버튼을 눌러 6.0 ~ 8.0으로 올리고 속도(Speed)를 4.8 ~ 5.5로 설정합니다.",
-        steps: [
-          "손잡이를 잡지 않고 팔을 자연스럽게 앞뒤로 흔들며 보폭을 넓게 해 걸어 올라갑니다.",
-          "약간 숨이 차고 이마에 땀이 맺히는 강도로 웨이트 직후 15~20분간 유지합니다."
-        ],
-        breathing: "코와 입으로 자연스럽고 리드미컬하게 호흡합니다.",
-        mistakes: [
-          "경사도를 높여놓고 양손으로 앞 손잡이를 매달리듯 잡고 걸으면 운동 효과가 절반 이하로 떨어집니다!"
-        ]
+            "category": "arm",
+            "categoryKo": "팔",
+            "match": [
+                  "덤벨 해머 컬",
+                  "해머 컬"
+            ],
+            "title": "덤벨 해머 컬 (Dumbbell Hammer Curl)",
+            "target": "💪 상완근 · 전완근 (팔 두께감 강화)",
+            "gifs": [
+                  {
+                        "id": "slDvUAU",
+                        "label": "덤벨 해머 컬"
+                  }
+            ],
+            "setup": "손바닥이 서로 마주 보게(망치 잡듯) 덤벨을 잡고 바르게 섭니다.",
+            "steps": [
+                  "팔꿈치를 옆구리에 붙인 채 그대로 수직으로 덤벨을 들어 올립니다.",
+                  "팔 바깥쪽과 전완근이 수축되면 천천히 버티며 내립니다."
+            ],
+            "breathing": "올릴 때 '후-' 뱉고, 내릴 때 마십니다.",
+            "mistakes": [
+                  "손목이 꺾이지 않게 일직선을 유지하세요."
+            ]
+      },
+      {
+            "category": "arm",
+            "categoryKo": "팔",
+            "match": [
+                  "케이블 삼두 푸쉬다운",
+                  "케이블 푸쉬다운",
+                  "트라이셉스 푸쉬다운"
+            ],
+            "title": "케이블 삼두 푸쉬다운 (Cable Pushdown)",
+            "target": "💪 팔 뒤쪽 (삼두근 말굽 모양)",
+            "gifs": [
+                  {
+                        "id": "gAwDzB3",
+                        "label": "케이블 삼두 푸쉬다운"
+                  }
+            ],
+            "setup": "케이블 바(또는 로프)를 잡고 팔꿈치를 옆구리에 붙여 고정합니다.",
+            "steps": [
+                  "어깨를 쓰지 않고 팔꿈치 아래만 아래로 쭉 펴며 바를 누릅니다.",
+                  "팔 뒤쪽 삼두근을 1초간 쥐어짠 후 팔꿈치가 90도가 될 때까지만 천천히 올립니다."
+            ],
+            "breathing": "아래로 펼 때 '후-' 뱉고, 올릴 때 마십니다.",
+            "mistakes": [
+                  "팔꿈치가 옆구리에서 앞뒤로 떨어지지 않게 단단히 고정하세요."
+            ]
+      },
+      {
+            "category": "core",
+            "categoryKo": "코어/유산소",
+            "match": [
+                  "바닥 크런치",
+                  "크런치",
+                  "복근"
+            ],
+            "title": "바닥 크런치 (Crunch)",
+            "target": "🍫 상복부 (식스팩 윗라인)",
+            "gifs": [
+                  {
+                        "id": "TFqbd8t",
+                        "label": "바닥 크런치"
+                  }
+            ],
+            "setup": "매트에 누워 무릎을 세우고 손은 귀 옆에 가볍게 댑니다.",
+            "steps": [
+                  "명치를 배꼽 쪽으로 말아 넣는 느낌으로 날개뼈만 바닥에서 들어 올립니다.",
+                  "윗배가 단단히 쥐어짜이면 1초 멈춘 뒤 천천히 내려옵니다."
+            ],
+            "breathing": "상체를 말아 올릴 때 입으로 숨을 끝까지 '후~' 뱉습니다.",
+            "mistakes": [
+                  "목을 양손으로 세게 잡아당기지 마세요."
+            ]
+      },
+      {
+            "category": "core",
+            "categoryKo": "코어/유산소",
+            "match": [
+                  "프론트 플랭크",
+                  "플랭크",
+                  "코어"
+            ],
+            "title": "프론트 플랭크 (Front Plank)",
+            "target": "🍫 코어 전체 · 복횡근 · 둔근",
+            "gifs": [
+                  {
+                        "id": "VBAWRPG",
+                        "label": "프론트 플랭크"
+                  }
+            ],
+            "setup": "팔꿈치를 어깨 아래에 두고 엎드려 발끝으로 몸을 지탱합니다.",
+            "steps": [
+                  "머리-등-엉덩이-발뒤꿈치가 일직선이 되도록 정렬합니다.",
+                  "배꼽을 등 쪽으로 당기고 엉덩이에 힘을 주어 버팁니다."
+            ],
+            "breathing": "숨을 참지 말고 규칙적으로 호흡하세요.",
+            "mistakes": [
+                  "허리가 아래로 처지면 허리 통증이 생기니 배를 조여주세요."
+            ]
+      },
+      {
+            "category": "core",
+            "categoryKo": "코어/유산소",
+            "match": [
+                  "트레드밀 인클라인 걷기",
+                  "트레드밀",
+                  "유산소",
+                  "워밍업"
+            ],
+            "title": "트레드밀 인클라인 걷기 (Incline Walking)",
+            "target": "🔥 체지방 연소 · 심폐 지구력",
+            "gifs": [
+                  {
+                        "id": "rjiM4L3",
+                        "label": "트레드밀 인클라인 경사 걷기"
+                  }
+            ],
+            "setup": "런닝머신 경사도(Incline)를 6~8로 올리고 속도를 4.8~5.2로 맞춥니다.",
+            "steps": [
+                  "손잡이를 잡지 않고 팔을 흔들며 보폭을 넓혀 걷습니다.",
+                  "심박수를 적절히 유지하며 15~20분간 지속합니다."
+            ],
+            "breathing": "코와 입으로 리드미컬하게 호흡합니다.",
+            "mistakes": [
+                  "손잡이에 매달려 걸으면 칼로리 소모가 크게 줄어듭니다."
+            ]
       }
-    ];
+];
+
+
 
     function findExerciseGuide(exName) {
+      if (!exName) return EXERCISE_DB[0];
+      const clean = exName.toLowerCase();
       for (const item of EXERCISE_DB) {
-        if (item.match.some(k => exName.includes(k))) return item;
+        if (item.match.some(k => clean.includes(k.toLowerCase()))) return item;
       }
-      return EXERCISE_DB[1]; // Default fallback
+      for (const item of EXERCISE_DB) {
+        if (clean.includes(item.categoryKo.toLowerCase())) return item;
+      }
+      return EXERCISE_DB[0];
     }
 
     function openExerciseGuide(exName) {
@@ -2415,30 +2852,235 @@
       });
     }
 
-    function renderExerciseEncyclopedia() {
-      const container = document.getElementById("exerciseEncyclopediaList");
+    let currentGuideCat = "all";
+    let currentLibCat = "all";
+
+    function filterGuideCategory(cat, btnEl) {
+      currentGuideCat = cat;
+      document.querySelectorAll("#guideFilterRow .filter-chip").forEach(b => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+      renderExerciseEncyclopedia();
+    }
+
+    function filterLibraryCategory(cat, btnEl) {
+      currentLibCat = cat;
+      document.querySelectorAll("#libFilterRow .filter-chip").forEach(b => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+      renderLibraryList();
+    }
+
+    function openAddExerciseModal() {
+      currentLibCat = "all";
+      const sInp = document.getElementById("libSearchInput");
+      if (sInp) sInp.value = "";
+      document.querySelectorAll("#libFilterRow .filter-chip").forEach((b, i) => b.classList.toggle("active", i === 0));
+      renderLibraryList();
+      document.getElementById("addExerciseModal").classList.add("open");
+    }
+
+    function closeAddExerciseModal() {
+      const box = document.getElementById("addExerciseSheetBox");
+      if (box) box.style.transform = "";
+      document.getElementById("addExerciseModal").classList.remove("open");
+    }
+
+    function renderLibraryList() {
+      const container = document.getElementById("libraryListContainer");
       if (!container) return;
       container.innerHTML = "";
-      EXERCISE_DB.forEach(item => {
+      const q = (document.getElementById("libSearchInput")?.value || "").trim().toLowerCase();
+
+      const filtered = EXERCISE_DB.filter(item => {
+        if (currentLibCat !== "all" && item.category !== currentLibCat) return false;
+        if (!q) return true;
+        return item.title.toLowerCase().includes(q) ||
+               item.target.toLowerCase().includes(q) ||
+               item.categoryKo.toLowerCase().includes(q) ||
+               item.match.some(m => m.toLowerCase().includes(q));
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:24px 10px; color:var(--text-muted); font-size:0.85rem;">검색 결과가 없습니다.<br>원하는 이름으로 직접 입력해 추가할 수 있습니다.</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
         const div = document.createElement("div");
-        div.className = "dict-item";
+        div.className = "catalog-item";
         const thumbSrc = getGifSrc(item.gifs[0].id);
+        const safeTitle = item.title.replace(/'/g, "\\'");
         div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img src="${thumbSrc}" alt="${item.title}" style="width:54px; height:54px; border-radius:10px; background:#fff; object-fit:contain; border:1px solid var(--primary); flex-shrink:0;" />
-            <div>
-              <div style="font-size:0.72rem; color:#6ee7b7; font-weight:700;">${item.target}</div>
-              <div style="font-size:0.88rem; font-weight:800; color:#fff; margin-top:2px;">${item.title}</div>
+          <div class="catalog-info" onclick="openExerciseGuide('${item.match[0]}')">
+            <img class="catalog-thumb" src="${thumbSrc}" alt="${item.title}" />
+            <div class="catalog-meta">
+              <span class="catalog-tag">${item.target}</span>
+              <strong class="catalog-title">${item.title}</strong>
             </div>
           </div>
-          <span class="how-to-btn">🔍 확대</span>
+          <div class="catalog-actions">
+            <button class="btn btn-sm btn-ghost" style="padding:6px 9px;" onclick="openExerciseGuide('${item.match[0]}')">자세</button>
+            <button class="btn btn-sm btn-accent" style="padding:6px 10px; font-weight:800;" onclick="addExerciseFromCatalog('${safeTitle}')">+ 담기</button>
+          </div>
         `;
-        div.onclick = () => openExerciseGuide(item.match[0]);
         container.appendChild(div);
       });
     }
 
-    const QUICK_FOODS = [
+    function renderExerciseEncyclopedia() {
+      const container = document.getElementById("exerciseEncyclopediaList");
+      if (!container) return;
+      container.innerHTML = "";
+      const filtered = EXERCISE_DB.filter(item => {
+        if (currentGuideCat === "all") return true;
+        return item.category === currentGuideCat;
+      });
+
+      filtered.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "catalog-item";
+        const thumbSrc = getGifSrc(item.gifs[0].id);
+        const safeTitle = item.title.replace(/'/g, "\\'");
+        div.innerHTML = `
+          <div class="catalog-info" onclick="openExerciseGuide('${item.match[0]}')">
+            <img class="catalog-thumb" src="${thumbSrc}" alt="${item.title}" />
+            <div class="catalog-meta">
+              <span class="catalog-tag">${item.target}</span>
+              <strong class="catalog-title">${item.title}</strong>
+            </div>
+          </div>
+          <div class="catalog-actions">
+            <button class="btn btn-sm btn-ghost" style="padding:6px 9px;" onclick="openExerciseGuide('${item.match[0]}')">🔍 자세</button>
+            <button class="btn btn-sm btn-accent" style="padding:6px 10px; font-weight:800;" onclick="addExerciseFromCatalog('${safeTitle}')">+ 루틴 추가</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function generateDefaultSetsForExercise(exName, profile) {
+      const f = getStrengthFactor(profile);
+      const name = exName.toLowerCase();
+      if (name.includes("트레드밀") || name.includes("유산소") || name.includes("사이클")) {
+        return [{ role: "유산소", kg: 0, reps: 20, done: false }];
+      }
+      if (name.includes("플랭크")) {
+        return [
+          { role: "본세트", kg: 0, reps: 45, done: false },
+          { role: "본세트", kg: 0, reps: 50, done: false },
+          { role: "탑세트", kg: 0, reps: 60, done: false }
+        ];
+      }
+      if (name.includes("크런치") || name.includes("복근")) {
+        return [
+          { role: "본세트", kg: 0, reps: 15, done: false },
+          { role: "본세트", kg: 0, reps: 15, done: false },
+          { role: "본세트", kg: 0, reps: 15, done: false }
+        ];
+      }
+      if (name.includes("레그 프레스")) {
+        const w = roundToStep(80 * f, 5);
+        return [
+          { role: "워밍업", kg: roundToStep(w * 0.75, 5), reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: roundToStep(w * 1.12, 5), reps: 10, done: false }
+        ];
+      }
+      if (name.includes("스쿼트")) {
+        const w = name.includes("고블릿") ? roundToStep(20 * f, 2) : roundToStep(50 * f, 5);
+        return [
+          { role: "워밍업", kg: roundToStep(w * 0.75, 2.5), reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: roundToStep(w + 5, 2.5), reps: 10, done: false }
+        ];
+      }
+      if (name.includes("데드리프트")) {
+        const w = roundToStep(40 * f, 5);
+        return [
+          { role: "워밍업", kg: roundToStep(w * 0.75, 5), reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: w + 5, reps: 10, done: false }
+        ];
+      }
+      if (name.includes("체스트 프레스") || name.includes("벤치프레스") || name.includes("랫 풀 다운") || name.includes("로우")) {
+        const w = roundToStep(35 * f, 5);
+        return [
+          { role: "워밍업", kg: roundToStep(w * 0.75, 5), reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: w + 5, reps: 10, done: false }
+        ];
+      }
+      if (name.includes("사이드 레터럴") || name.includes("사레레")) {
+        const w = Math.max(2, Math.round(4 * f));
+        return [
+          { role: "본세트", kg: w, reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 15, done: false },
+          { role: "탑세트", kg: Math.max(3, Math.round(5 * f)), reps: 12, done: false }
+        ];
+      }
+      if (name.includes("컬")) {
+        const w = Math.max(4, Math.round(8 * f));
+        return [
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: w + 2, reps: 10, done: false }
+        ];
+      }
+      if (name.includes("푸쉬다운")) {
+        const w = roundToStep(15 * f, 2.5);
+        return [
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: w + 2.5, reps: 10, done: false }
+        ];
+      }
+      if (name.includes("플라이") || name.includes("익스텐션") || name.includes("레그 컬") || name.includes("어브덕션")) {
+        const w = roundToStep(25 * f, 5);
+        return [
+          { role: "본세트", kg: Math.max(10, w - 5), reps: 15, done: false },
+          { role: "본세트", kg: w, reps: 12, done: false },
+          { role: "탑세트", kg: w + 5, reps: 10, done: false }
+        ];
+      }
+      return [
+        { role: "본세트", kg: 20, reps: 12, done: false },
+        { role: "본세트", kg: 20, reps: 12, done: false },
+        { role: "탑세트", kg: 25, reps: 10, done: false }
+      ];
+    }
+
+    function addExerciseFromCatalog(exName) {
+      const day = ensureDay(selectedDate);
+      const guide = findExerciseGuide(exName);
+      const shortName = guide.title.split("(")[0].trim() || exName;
+      const sets = generateDefaultSetsForExercise(exName, appState.profile);
+      day.exercises.push({
+        name: shortName,
+        tip: guide.setup ? guide.setup.slice(0, 48) + "..." : "자세를 확인하며 정자세로 진행하세요",
+        sets: sets
+      });
+      saveState();
+      renderWorkoutList();
+      showToast(`✅ [${shortName}] 오늘 루틴에 추가 완료!`);
+    }
+
+    function moveExercise(exIdx, delta) {
+      const day = ensureDay(selectedDate);
+      const newIdx = exIdx + delta;
+      if (newIdx < 0 || newIdx >= day.exercises.length) return;
+      const [item] = day.exercises.splice(exIdx, 1);
+      day.exercises.splice(newIdx, 0, item);
+      if (workoutViewMode === "focus") focusExIdx = newIdx;
+      saveState();
+      renderWorkoutList();
+      showToast(`🔄 순서 변경 (${newIdx + 1}번째)`);
+    }
+
+
+const QUICK_FOODS = [
       { emoji: "🍗", name: "닭가슴살 100g", carb: 1, protein: 23, fat: 1.5 },
       { emoji: "🥚", name: "삶은 계란 2개", carb: 1.5, protein: 13, fat: 10 },
       { emoji: "🍚", name: "현미/즉석밥 1공기", carb: 68, protein: 6, fat: 1.5 },
@@ -2609,6 +3251,7 @@
       setToday();
       initBottomSheetSwipe("exerciseGuideModal", "exerciseSheetBox", closeExerciseModal);
       initBottomSheetSwipe("installModal", "installSheetBox", closeInstallModal);
+      initBottomSheetSwipe("addExerciseModal", "addExerciseSheetBox", closeAddExerciseModal);
       const cloudUrl = "https://chldlrtjr.github.io/lean-mass-mate/";
       document.getElementById("qrUrlText").textContent = cloudUrl;
       document.getElementById("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(cloudUrl)}`;
@@ -2833,10 +3476,14 @@
             </div>` : ""}
             <div class="ex-info-col">
               <div class="ex-top">
-                <div class="ex-name" onclick="openExerciseGuide('${safeName}')" style="cursor:pointer;">
+                <div class="ex-name" onclick="openExerciseGuide('${safeName}')" style="cursor:pointer; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                   ${exIdx + 1}. ${ex.name}
                 </div>
-                <button class="btn btn-sm btn-danger" style="padding:3px 7px;" onclick="deleteExercise(${exIdx})">✕</button>
+                <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                  <button class="btn btn-sm btn-ghost" style="padding:2px 7px; font-size:0.75rem;" onclick="moveExercise(${exIdx}, -1)" ${exIdx === 0 ? "disabled style='opacity:0.3; pointer-events:none;'" : ""} title="위로 이동">▲</button>
+                  <button class="btn btn-sm btn-ghost" style="padding:2px 7px; font-size:0.75rem;" onclick="moveExercise(${exIdx}, 1)" ${exIdx === day.exercises.length - 1 ? "disabled style='opacity:0.3; pointer-events:none;'" : ""} title="아래로 이동">▼</button>
+                  <button class="btn btn-sm btn-danger" style="padding:2px 7px; font-size:0.75rem;" onclick="deleteExercise(${exIdx})" title="종목 삭제">✕</button>
+                </div>
               </div>
               <div class="ex-tip" onclick="openExerciseGuide('${safeName}')" style="cursor:pointer;">
                 💡 ${ex.tip || "자세 가이드를 확인하세요"} <span style="color:#60a5fa; font-weight:700;">[자세 바텀시트 ›]</span>
@@ -3290,5 +3937,39 @@
       reader.readAsText(file);
     }
   </script>
+
+  <!-- ADD EXERCISE LIBRARY BOTTOM SHEET -->
+  <div id="addExerciseModal" class="modal-backdrop" onclick="if(event.target===this) closeAddExerciseModal()">
+    <div class="modal-box" id="addExerciseSheetBox" style="max-height:85vh;">
+      <div class="sheet-handle-area" id="addExerciseSheetHandle">
+        <div class="sheet-handle"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div>
+          <h3 style="font-size:1.05rem; font-weight:800; color:#fff;">🏋️ 운동 종목 라이브러리</h3>
+          <span style="font-size:0.75rem; color:var(--text-muted);">원하는 운동을 터치 한 번으로 오늘 루틴에 추가하세요</span>
+        </div>
+        <button class="btn btn-sm btn-ghost" onclick="closeAddExerciseModal()">✕ 닫기</button>
+      </div>
+
+      <!-- Search and Category Filters -->
+      <div style="margin-bottom:8px;">
+        <input type="text" id="libSearchInput" class="form-input" placeholder="🔍 운동명 또는 부위 검색 (예: 덤벨, 가슴, 스쿼트)" oninput="renderLibraryList()" style="font-size:0.85rem; padding:8px 12px; margin-bottom:8px;" />
+        <div class="filter-chips-row" id="libFilterRow">
+          <button class="filter-chip active" data-cat="all" onclick="filterLibraryCategory('all', this)">전체</button>
+          <button class="filter-chip" data-cat="chest" onclick="filterLibraryCategory('chest', this)">가슴</button>
+          <button class="filter-chip" data-cat="back" onclick="filterLibraryCategory('back', this)">등</button>
+          <button class="filter-chip" data-cat="shoulder" onclick="filterLibraryCategory('shoulder', this)">어깨</button>
+          <button class="filter-chip" data-cat="leg" onclick="filterLibraryCategory('leg', this)">하체</button>
+          <button class="filter-chip" data-cat="arm" onclick="filterLibraryCategory('arm', this)">팔(이두/삼두)</button>
+          <button class="filter-chip" data-cat="core" onclick="filterLibraryCategory('core', this)">코어/유산소</button>
+        </div>
+      </div>
+
+      <!-- Catalog List Container -->
+      <div id="libraryListContainer" style="max-height:55vh; overflow-y:auto; padding-right:2px;"></div>
+    </div>
+  </div>
+
 </body>
 </html>
