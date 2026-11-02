@@ -1,4 +1,4 @@
-const CACHE_NAME = "lean-mass-app-v9";
+const CACHE_NAME = "lean-mass-app-v10";
 const ASSETS = [
   "./",
   "./index.html",
